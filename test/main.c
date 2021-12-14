@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <recurrence/recurrence.h>
 
@@ -47,6 +48,13 @@ int main(int argc, char** argv) {
     strcat(description, argv[1]);
     printf("description: %s\n", description);
     OccurrenceSeries* series = recurrence_series_new(description);
+
+    time_t current = time(NULL);
+    char* current_time = asctime(gmtime(&current));
+    printf("Current time: %s", current_time);
+    time_t next = recurrence_next_occurrence(current, series);
+    char* next_occurrence = asctime(gmtime(&next));
+    printf("Next occurrence: %s", next_occurrence);
     recurrence_series_free(&series);
 }
 

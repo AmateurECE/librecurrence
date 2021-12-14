@@ -33,15 +33,17 @@
 #ifndef RECURRENCE_H
 #define RECURRENCE_H
 
-#include <time.h>
+#include <sys/types.h>
 
 // Opaque struct performing the workload of the library
 typedef struct OccurrenceSeries OccurrenceSeries;
 
 // Specifies which direction to round to an occurrence
 enum RecurrenceRoundingDirection {
-    RECURRENCE_ROUND_UP,
-    RECURRENCE_ROUND_DOWN,
+    RECURRENCE_ROUND_UP=0,
+    RECURRENCE_ROUND_DOWN=1,
+    RECURRENCE_ROUND_UP_EQUAL=2,
+    RECURRENCE_ROUND_DOWN_EQUAL=4,
 };
 
 // Convert the human-readable series description in <description> to an

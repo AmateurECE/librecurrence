@@ -30,9 +30,15 @@
 // IN THE SOFTWARE.
 ////
 
+#include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <recurrence/recurrence.h>
+
+static const int RECCURRENCE_ROUND_EQUAL = 1<<1;
+
+static const int MONTHS_IN_YEAR = 12;
 
 // Opaque struct performing the workload of the library
 typedef struct OccurrenceSeries {
@@ -45,6 +51,21 @@ typedef struct ParserInputContext {
     size_t length;
     size_t index;
 } ParserInputContext;
+
+enum Month {
+    JANUARY,
+    FEBRUARY,
+    MARCH,
+    APRIL,
+    MAY,
+    JUNE,
+    JULY,
+    AUGUST,
+    SEPTEMBER,
+    OCTOBER,
+    NOVEMBER,
+    DECEMBER,
+};
 
 static void series_monthly(OccurrenceSeries* series, char* text);
 typedef struct _yycontext yycontext;
@@ -61,7 +82,7 @@ static void priv_recurrence_input(yycontext* context, char* buffer,
 ////
 
 static void series_monthly(OccurrenceSeries* series, char* text) {
-    printf("%s\n", text);
+    series->day_of_month = strtol(text, NULL, 10);
 }
 
 static void priv_recurrence_input(yycontext* context, char* buffer,
@@ -81,6 +102,36 @@ static void priv_recurrence_input(yycontext* context, char* buffer,
     strncpy(buffer, input->string + input->index, bytes_read);
     input->index += bytes_read;
     *result = bytes_read;
+}
+
+static bool priv_is_leap_year(int year) {
+    if (0 == year % 400) {
+        return true;
+    } else if (0 == year % 100) {
+        return false;
+    } else if (0 == year % 4) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static int priv_days_in_month(enum Month month, bool leap_year) {
+    switch (month) {
+    case JANUARY: return 31;
+    case FEBRUARY: return leap_year ? 28 : 29;
+    case MARCH: return 31;
+    case APRIL: return 30;
+    case MAY: return 31;
+    case JUNE: return 30;
+    case JULY: return 31;
+    case AUGUST: return 31;
+    case SEPTEMBER: return 30;
+    case OCTOBER: return 31;
+    case NOVEMBER: return 30;
+    case DECEMBER: return 31;
+    default: return 0;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,6 +159,14 @@ OccurrenceSeries* recurrence_series_new(char* description) {
     while (yyparse(&context));
 
     yyrelease(&context);
+
+    // If day_of_month hasn't been set, there was clearly a parser error.
+    if (0 == series->day_of_month) {
+        fprintf(stderr, "Parser error\n");
+        free(series);
+        return NULL;
+    }
+
     return series;
 }
 
@@ -121,15 +180,36 @@ void recurrence_series_free(OccurrenceSeries** series) {
     *series = NULL;
 }
 
-// Canonicalize <occurrence> to the occurrence series <series>, rounding up or
-// down to the nearest occurrence in the series based on <direction>.
-time_t recurrence_canonicalize(time_t occurrence, OccurrenceSeries* series,
-    enum RecurrenceRoundingDirection direction)
-{ return (time_t)-1; }
-
 // Return the next occurrence in the series <series>, whether <occurrence> is
 // a canonical occurrence in <series> or not.
 time_t recurrence_next_occurrence(time_t occurrence, OccurrenceSeries* series)
-{ return (time_t)-1; }
+{
+    struct tm* occurrence_broken = gmtime(&occurrence);
+    if (NULL == occurrence_broken) {
+        return (time_t)-1;
+    }
+
+    // In the simplest case, the event just hasn't happened yet this month.
+    if (series->day_of_month > occurrence_broken->tm_mday) {
+        occurrence_broken->tm_mday = series->day_of_month;
+        return mktime(occurrence_broken);
+    }
+
+    // Otherwise, it will be happening next month, which may be next year.
+    int new_month = occurrence_broken->tm_mon + 1;
+    if (new_month >= MONTHS_IN_YEAR) {
+        new_month %= MONTHS_IN_YEAR;
+        occurrence_broken->tm_year += 1;
+    }
+
+    if (series->day_of_month >= priv_days_in_month(new_month,
+            priv_is_leap_year(occurrence_broken->tm_year))) {
+        return (time_t)-1;
+    }
+
+    occurrence_broken->tm_mday = series->day_of_month;
+    occurrence_broken->tm_mon = new_month;
+    return mktime(occurrence_broken);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
