@@ -34,12 +34,13 @@ from datetime import datetime
 from importlib import util
 import sys
 
-def main(pyrecurrence):
-    series = pyrecurrence.PyOccurrenceSeries("monthly on the 3rd")
+def main(pyrecurrence, day):
+    series = pyrecurrence.PyOccurrenceSeries(f'monthly on the {day}')
     now = datetime.now()
-    print(now.strftime("%A, %d %B %Y %I:%M %p"))
-    next = series.next_occurrence(now)
-    print(next)
+    theFormat = "%A, %d %B %Y %I:%M %p"
+    print(now.strftime(theFormat))
+    theNext = series.next_occurrence(now)
+    print(theNext.strftime(theFormat))
 
 if __name__ == '__main__':
     # Load the module
@@ -47,6 +48,6 @@ if __name__ == '__main__':
                                                      sys.argv[1])
     pyrecurrence = util.module_from_spec(pyrecurrence_spec)
     pyrecurrence_spec.loader.exec_module(pyrecurrence)
-    main(pyrecurrence)
+    main(pyrecurrence, sys.argv[2])
 
 ###############################################################################

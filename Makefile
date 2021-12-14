@@ -32,13 +32,9 @@
 
 module = $(wildcard build/lib.*/*.so)
 pytest: $(module)
-	LD_LIBRARY_PATH=build python3 test/test.py $(module)
+	LD_LIBRARY_PATH=build python3 test/test.py $(module) $(DAY)
 
-$(module): build/librecurrence.so
+$(module): build/librecurrence.so pyrecurrence/recurrence.pyx
 	python3 setup.py build_ext
-
-build/librecurrence.so:
-	-meson setup build
-	(cd build && ninja)
 
 ###############################################################################

@@ -48,7 +48,7 @@ cdef class PyOccurrenceSeries:
     cdef OccurrenceSeries* series
 
     def __cinit__(self, description: str):
-        series = recurrence_series_new(bytearray(description, 'ascii'))
+        self.series = recurrence_series_new(bytearray(description, 'ascii'))
 
     def next_occurrence(self, occurrence: datetime):
         cdef time_t next = recurrence_next_occurrence(occurrence.timestamp(),
