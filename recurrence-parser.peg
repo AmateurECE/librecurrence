@@ -1,11 +1,15 @@
 
 series <- "monthly on the " < ordinal_date > {
         series_monthly(yy->input_context->series, yytext); }
-ordinal_date <- first
-    / second
-    / third
-    / nth
-first <- [0-3]? "1st"
-second <- [0-2]? "2nd"
-third <- [0-2]? "3rd"
-nth <- [0-2]? [4-9] "th" / "30th"
+ordinal_date <- first / second / third
+    / [4-9] "th"
+    / "1" [0-9] "th"
+    / "2" first
+    / "2" second
+    / "2" third
+    / "2" [04-9] "th"
+    / "30th"
+    / "3" first
+first <- "1st"
+second <- "2nd"
+third <- "3rd"

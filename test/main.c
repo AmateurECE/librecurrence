@@ -30,10 +30,23 @@
 // IN THE SOFTWARE.
 ////
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <recurrence/recurrence.h>
 
-int main() {
-    OccurrenceSeries* series = recurrence_series_new("monthly on the 3rd");
+int main(int argc, char** argv) {
+    if (2 > argc) {
+        printf("usage: %s <day_of_month>\n", argv[0]);
+        exit(1);
+    }
+
+    char description[64] = {0};
+    strcat(description, "monthly on the ");
+    strcat(description, argv[1]);
+    printf("description: %s\n", description);
+    OccurrenceSeries* series = recurrence_series_new(description);
     recurrence_series_free(&series);
 }
 

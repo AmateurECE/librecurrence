@@ -36,7 +36,7 @@
 
 // Opaque struct performing the workload of the library
 typedef struct OccurrenceSeries {
-    int unused;
+    time_t day_of_month;
 } OccurrenceSeries;
 
 typedef struct ParserInputContext {
