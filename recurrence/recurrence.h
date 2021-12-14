@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NAME:            main.c
+// NAME:            recurrence.h
 //
 // AUTHOR:          Ethan D. Twardy <ethan.twardy@gmail.com>
 //
-// DESCRIPTION:     Entrypoint for testing
+// DESCRIPTION:     Public interface for the API
 //
-// CREATED:         12/10/2021
+// CREATED:         12/13/2021
 //
 // LAST EDITED:     12/13/2021
 //
@@ -30,11 +30,36 @@
 // IN THE SOFTWARE.
 ////
 
-#include <recurrence/recurrence.h>
+#ifndef RECURRENCE_H
+#define RECURRENCE_H
 
-int main() {
-    OccurrenceSeries* series = recurrence_series_new("monthly on the 3rd");
-    recurrence_series_free(&series);
-}
+#include <time.h>
+
+// Opaque struct performing the workload of the library
+typedef struct OccurrenceSeries OccurrenceSeries;
+
+// Specifies which direction to round to an occurrence
+enum RecurrenceRoundingDirection {
+    RECURRENCE_ROUND_UP,
+    RECURRENCE_ROUND_DOWN,
+};
+
+// Convert the human-readable series description in <description> to an
+// OccurrenceSeries
+OccurrenceSeries* recurrence_series_new(char* description);
+
+// Free internal memory used by an OccurrenceSeries
+void recurrence_series_free(OccurrenceSeries** series);
+
+// Canonicalize <occurrence> to the occurrence series <series>, rounding up or
+// down to the nearest occurrence in the series based on <direction>.
+time_t recurrence_canonicalize(time_t occurrence, OccurrenceSeries* series,
+    enum RecurrenceRoundingDirection direction);
+
+// Return the next occurrence in the series <series>, whether <occurrence> is
+// a canonical occurrence in <series> or not.
+time_t recurrence_next_occurrence(time_t occurrence, OccurrenceSeries* series);
+
+#endif // RECURRENCE_H
 
 ///////////////////////////////////////////////////////////////////////////////

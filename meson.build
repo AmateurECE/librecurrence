@@ -7,7 +7,7 @@
 #
 # CREATED:          12/10/2021
 #
-# LAST EDITED:      12/10/2021
+# LAST EDITED:      12/13/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -39,13 +39,21 @@ project(
 add_project_arguments('-frecord-gcc-switches', language: 'c')
 include_directories('recurrence')
 
-librecurrence_sources = files([
-  'recurrence/recurrence.c',
-])
+recurrence_parser = custom_target(
+  'recurrence-parser.h',
+  output: 'recurrence-parser.h',
+  input: 'recurrence-parser.peg',
+  command: ['peg', '-o', '@OUTPUT@', '@INPUT@'],
+  build_by_default: true,
+)
 
 librecurrence = library(
   'recurrence',
-  sources: librecurrence_sources,
+  sources: [
+    recurrence_parser,
+    'recurrence/recurrence.c',
+  ],
+  c_args: ['-Wno-unused-parameter', '-Wno-unused-function'],
   version: meson.project_version(),
 )
 
