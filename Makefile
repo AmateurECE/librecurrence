@@ -37,4 +37,9 @@ pytest: $(module)
 $(module): build/librecurrence.so pyrecurrence/recurrence.pyx
 	python3 setup.py build_ext
 
+clean:
+	rm -rf build
+	rm -rf dist
+	rm -rf pyrecurrence.egg-info
+
 ###############################################################################
