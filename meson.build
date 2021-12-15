@@ -7,7 +7,7 @@
 #
 # CREATED:          12/10/2021
 #
-# LAST EDITED:      12/13/2021
+# LAST EDITED:      12/14/2021
 #
 # Copyright 2021, Ethan D. Twardy
 #
@@ -47,6 +47,10 @@ recurrence_parser = custom_target(
   build_by_default: true,
 )
 
+install_headers(
+  'recurrence/recurrence.h',
+)
+
 librecurrence = library(
   'recurrence',
   sources: [
@@ -55,7 +59,11 @@ librecurrence = library(
   ],
   c_args: ['-Wno-unused-parameter', '-Wno-unused-function'],
   version: meson.project_version(),
+  install: true,
 )
+
+pkgconfig = import('pkgconfig')
+pkgconfig.generate(librecurrence, filebase: 'librecurrence')
 
 executable(
   'testrecurrence',
